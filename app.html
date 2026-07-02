@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DotGlasses - PWA Field App Simulator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Lexend', sans-serif;
+            background-color: #EFEADF;
+            color: #000000;
+        }
+        .bg-brand-orange { background-color: #F96715; }
+        .text-brand-orange { color: #F96715; }
+        .bg-brand-green { background-color: #234833; }
+        .bg-brand-yellow { background-color: #FFB600; }
+        .bg-brand-pink { background-color: #FF85BC; }
+        .bg-brand-blue { background-color: #4287C6; }
+        .dot-pattern {
+            background-image: radial-gradient(#F96715 2px, transparent 2px);
+            background-size: 16px 16px;
+        }
+        .phone-shadow {
+            box-shadow: 0 25px 50px -12px rgba(249, 103, 21, 0.25);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 md:p-8">
+
+    <!-- Back to gateway absolute selector button -->
+    <div class="absolute top-4 left-4 z-40">
+        <a href="index.html" class="flex items-center space-x-2 bg-black text-white hover:bg-brand-orange px-4 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            <span>Return to Gateway</span>
+        </a>
+    </div>
+
+    <!-- PWA Smartphone Device Frame Container -->
+    <div class="bg-black p-4 rounded-[40px] border-4 border-gray-800 shadow-2xl w-full max-w-sm flex flex-col relative aspect-[9/19.5] phone-shadow">
+        
+        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 h-5 w-40 bg-black rounded-b-2xl z-30 flex items-center justify-center">
+            <div class="w-12 h-1 bg-gray-900 rounded-full mb-1"></div>
+        </div>
+
+        <div class="bg-[#EFEADF] rounded-[28px] overflow-hidden flex flex-col w-full h-full relative border border-gray-950">
+            <!-- PWA top phone status indicators -->
+            <div class="bg-black text-white px-5 pt-4 pb-1.5 flex justify-between items-center text-[10px] font-black tracking-widest z-10">
+                <span>12:26</span>
+                <div class="flex items-center space-x-1.5 text-gray-400">
+                    <i data-lucide="wifi" class="w-3 h-3 text-white"></i>
+                    <i data-lucide="signal" class="w-3 h-3"></i>
+                    <i data-lucide="battery" class="w-3.5 h-3.5 text-brand-green"></i>
+                </div>
+            </div>
+
+            <!-- Offline / Sync network state toggle ribbon -->
+            <div id="fieldapp-netbar" class="bg-brand-green text-white px-4 py-2 flex items-center justify-between text-[10px] font-black uppercase tracking-wider">
+                <div class="flex items-center space-x-1.5">
+                    <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                    <span>Online &bull; Sync Enabled</span>
+                </div>
+                <button onclick="toggleFieldAppNetwork()" class="bg-black text-brand-yellow px-2 py-0.5 rounded-full text-[8px] tracking-widest uppercase border border-gray-800">
+                    Cut Signal
+                </button>
+            </div>
+
+            <!-- Mobile subscreen context area -->
+            <div class="flex-grow overflow-y-auto flex flex-col justify-between relative bg-brand-beige">
+
+                <!-- SUB 1: FIELD LOGIN -->
+                <div id="mob-sub-login" class="flex-grow p-6 flex flex-col justify-between space-y-6">
+                    <div class="space-y-4">
+                        <div class="text-center pt-2">
+                            <span class="text-[9px] bg-brand-orange text-white px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">Distributor Login</span>
+                            <h4 class="text-xl font-black uppercase tracking-wider text-black mt-2">Field App Simulator</h4>
+                        </div>
+                        <div class="bg-white border-2 border-black p-3 rounded-xl space-y-2">
+                            <span class="text-[8px] font-black uppercase tracking-widest text-brand-orange block">Quick Select Agent Role</span>
+                            <select id="mob-login-account-select" onchange="autoFillFieldLogin()" class="w-full bg-brand-beige border rounded p-1.5 text-xs font-bold focus:outline-none">
+                                <option value="usr-6" selected>Kipchoge Keino (Field User)</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <input type="email" id="mob-login-email" value="kipchoge@kisumu-vision.com" class="w-full bg-white border-2 border-black p-2 rounded-lg text-xs font-bold focus:outline-none">
+                            <input type="password" id="mob-login-pin" value="2026" class="w-full bg-white border-2 border-black p-2 rounded-lg text-xs font-bold text-center tracking-widest">
+                        </div>
+                    </div>
+                    <button onclick="processFieldLogin()" class="w-full bg-black text-white hover:bg-brand-orange py-3 rounded-xl text-xs font-black uppercase tracking-wider">Unlock Field Shell</button>
+                </div>
+
+                <!-- SUB 2: SESSION LOCATION SCOPING -->
+                <div id="mob-sub-scoping" class="flex-grow p-6 flex flex-col justify-between space-y-6 hidden">
+                    <div class="space-y-4">
+                        <div class="text-center pt-2">
+                            <h4 class="text-xl font-black uppercase tracking-wider text-black">Active Scope</h4>
+                            <p class="text-xxs text-gray-500 font-semibold mt-1">Select your active retail checkup point location below.</p>
+                        </div>
+                        <select id="mob-scope-point-select" class="w-full bg-white border-2 border-black rounded-xl p-3 text-xs font-bold focus:outline-none"></select>
+                    </div>
+                    <button onclick="processFieldScoping()" class="w-full bg-black text-white hover:bg-brand-orange py-3.5 rounded-xl text-xs font-black uppercase tracking-wider">Set Active Outlet</button>
+                </div>
+
+                <!-- SUB 3: HOME DASHBOARD ACTIONS -->
+                <div id="mob-sub-workspace" class="flex-grow flex flex-col justify-between hidden">
+                    <div class="p-4 bg-white border-b-2 border-black space-y-2">
+                        <div class="flex justify-between items-center">
+                            <h4 id="mob-user-name-lbl" class="text-xs font-black uppercase tracking-wide">User Agent</h4>
+                            <button onclick="logoutFieldApp()" class="text-gray-400 hover:text-brand-orange"><i data-lucide="log-out" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="bg-brand-beige border border-black p-2.5 rounded-xl flex items-center justify-between">
+                            <span id="mob-outlet-lbl" class="text-xxs font-black uppercase">Kisumu Outlet</span>
+                            <span id="mob-preset-lbl" class="bg-black text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase">9-LENS</span>
+                        </div>
+                    </div>
+
+                    <div class="p-5 flex-grow flex flex-col justify-center space-y-2.5">
+                        <button onclick="launchFieldForm('TestOnly')" class="w-full py-3.5 px-4 rounded-xl border border-black bg-brand-pink text-left flex items-center justify-between text-xs font-black uppercase">
+                            <span>1. Record Vision Test Only</span><i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="launchFieldForm('Lead')" class="w-full py-3.5 px-4 rounded-xl border border-black bg-brand-yellow/35 text-left flex items-center justify-between text-xs font-black uppercase">
+                            <span>2. Record Lead Opportunity</span><i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="launchFieldForm('Sale')" class="w-full py-3.5 px-4 rounded-xl border border-black bg-brand-orange text-white text-left flex items-center justify-between text-xs font-black uppercase">
+                            <span>3. Log Standard Glasses Sale</span><i data-lucide="arrow-right" class="w-4 h-4 text-white"></i>
+                        </button>
+                        <button onclick="launchFieldForm('CustomOrder')" class="w-full py-3.5 px-4 rounded-xl border border-black bg-brand-blue/20 text-left flex items-center justify-between text-xs font-black uppercase">
+                            <span>4. Log Custom Prescription</span><i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-4 bg-gray-100 border-t-2 border-black flex justify-between items-center text-[10px] font-extrabold uppercase">
+                        <span>Offline Buffer queue: <span id="mob-sync-queue-count" class="text-brand-orange">0</span></span>
+                        <button onclick="triggerFieldAppSync()" id="mob-sync-btn" class="bg-brand-orange text-white px-3 py-1 rounded-full text-[8px] font-black uppercase disabled:opacity-50" disabled>Reconcile</button>
+                    </div>
+                </div>
+
+                <!-- SUB 4: CONSULTATION FORMS -->
+                <div id="mob-sub-form" class="flex-grow flex flex-col justify-between hidden">
+                    <div class="p-3 border-b bg-white flex justify-between items-center">
+                        <button onclick="closeFieldForm()"><i data-lucide="arrow-left" class="w-4.5 h-4.5"></i></button>
+                        <span id="mob-form-title" class="text-xs font-black uppercase tracking-wider">Log Consultation</span>
+                        <div class="w-5"></div>
+                    </div>
+
+                    <div class="p-4 flex-grow overflow-y-auto space-y-4 max-h-[350px]">
+                        <div class="bg-white p-3 rounded-lg border border-black space-y-3">
+                            <div class="grid grid-cols-2 gap-2">
+                                <select id="mob-form-age" class="w-full bg-brand-beige border rounded p-1 text-xs font-bold">
+                                    <option value="28" selected>Young Adult (18-35)</option>
+                                    <option value="58">Middle-Age (51-65)</option>
+                                </select>
+                                <select id="mob-form-gender" class="w-full bg-brand-beige border rounded p-1 text-xs font-bold">
+                                    <option value="Female">Female</option>
+                                    <option value="Male">Male</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="mob-form-crm" class="bg-brand-yellow/10 p-3 rounded-lg border border-black space-y-2 hidden">
+                            <input type="text" id="mob-form-name" placeholder="Patient Full Name" class="w-full bg-white border p-2 text-xs font-bold rounded">
+                            <input type="tel" id="mob-form-phone" placeholder="M-Pesa contact number" class="w-full bg-white border p-2 text-xs font-bold rounded">
+                        </div>
+
+                        <div id="mob-form-dropout" class="bg-brand-pink/10 p-3 rounded-lg border border-black hidden">
+                            <select id="mob-form-dropout-select" class="w-full bg-white border p-1.5 text-xs font-bold rounded">
+                                <option value="Awaiting pay day">Awaiting pay day limits</option>
+                                <option value="Wants to consult spouse">Wants to consult relative</option>
+                            </select>
+                        </div>
+
+                        <div id="mob-form-prescription" class="bg-brand-blue/10 p-3 rounded-lg border border-black space-y-2 hidden">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <select id="mob-form-left-sphere" class="w-full border rounded p-1 text-xs font-bold"></select>
+                                    <select id="mob-form-left-cylinder" class="w-full border rounded p-1 text-xs font-bold mt-1">
+                                        <option value="0.00">0.00 (Std)</option>
+                                        <option value="-1.00">-1.00</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <select id="mob-form-right-sphere" class="w-full border rounded p-1 text-xs font-bold"></select>
+                                    <select id="mob-form-right-cylinder" class="w-full border rounded p-1 text-xs font-bold mt-1">
+                                        <option value="0.00">0.00 (Std)</option>
+                                        <option value="-1.00">-1.00</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 border-t bg-white">
+                        <button onclick="submitFieldAppForm()" class="w-full bg-black text-white hover:bg-brand-orange py-2.5 rounded-xl text-xs font-black uppercase">Process Consultation</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Dynamic Storage & System State Engine -->
+    <script>
+        let state = JSON.parse(localStorage.getItem('dotglasses_state')) || {
+            retailPoints: [
+                { id: "rp-1", name: "Nairobi East Pharmacy", retailerId: "ret-1", type: "Physical" },
+                { id: "rp-2", name: "Kisumu Central Outreach", retailerId: "ret-1", type: "Outreach" },
+                { id: "rp-3", name: "Mombasa Mobile Agent #4", retailerId: "ret-2", type: "MobileAgent" },
+                { id: "rp-4", name: "Eldoret Medical Hub", retailerId: "ret-1", type: "Physical" }
+            ],
+            retailers: [
+                { id: "ret-1", name: "Halons Pharmacy Chain", countryOfficeId: "co-1", presetId: "preset-9" },
+                { id: "ret-2", name: "Amani Mission Clinics", countryOfficeId: "co-1", presetId: "preset-6" },
+                { id: "ret-3", name: "Independent Micro-Agents", countryOfficeId: "co-2", presetId: "preset-9" }
+            ],
+            countryOffices: [
+                { id: "co-1", name: "Kenya Operations", region: "East Africa" },
+                { id: "co-2", name: "Ethiopia Operations", region: "Horn of Africa" },
+                { id: "co-3", name: "Rwanda Operations", region: "East Africa" }
+            ],
+            users: [
+                { id: "usr-1", name: "Bradley Heslop", email: "bradley@dotglasses.org", role: "GlobalAdmin", scopeId: null, scopeType: "DGI", isActive: true },
+                { id: "usr-2", name: "Joseph Ellis", email: "joe@jellis.tech", role: "CountryManager", scopeId: "co-1", scopeType: "CountryOffice", isActive: true },
+                { id: "usr-6", name: "Kipchoge Keino", email: "kipchoge@kisumu-vision.com", role: "FieldUser", scopeId: "rp-2", scopeType: "RetailPoint", isActive: true }
+            ],
+            consultations: [],
+            localQueue: []
+        };
+
+        function saveState() {
+            localStorage.setItem('dotglasses_state', JSON.stringify(state));
+        }
+
+        let fieldAppSession = { loggedInUser: null, selectedOutlet: null, isOnline: true };
+        let selectedEventType = 'TestOnly';
+
+        window.onload = function() {
+            lucide.createIcons();
+            logoutFieldApp();
+        };
+
+        function autoFillFieldLogin() {
+            const select = document.getElementById('mob-login-account-select').value;
+            const emailInput = document.getElementById('mob-login-email');
+            const user = state.users.find(u => u.id === select);
+            if (user) emailInput.value = user.email;
+        }
+
+        function processFieldLogin() {
+            const email = document.getElementById('mob-login-email').value.trim();
+            const user = state.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+            if (!user) return;
+
+            fieldAppSession.loggedInUser = user;
+            
+            // Scope Outlet dropdown populating
+            const select = document.getElementById('mob-scope-point-select');
+            select.innerHTML = "";
+            state.retailPoints.forEach(p => {
+                select.innerHTML += `<option value="${p.id}">${p.name} (${p.type})</option>`;
+            });
+
+            document.getElementById('mob-sub-login').classList.add('hidden');
+            document.getElementById('mob-sub-scoping').classList.remove('hidden');
+        }
+
+        function processFieldScoping() {
+            const id = document.getElementById('mob-scope-point-select').value;
+            fieldAppSession.selectedOutlet = state.retailPoints.find(p => p.id === id);
+
+            document.getElementById('mob-sub-scoping').classList.add('hidden');
+            document.getElementById('mob-sub-workspace').classList.remove('hidden');
+            
+            document.getElementById('mob-user-name-lbl').textContent = fieldAppSession.loggedInUser.name;
+            document.getElementById('mob-outlet-lbl').textContent = fieldAppSession.selectedOutlet.name;
+        }
+
+        function logoutFieldApp() {
+            fieldAppSession.loggedInUser = null;
+            fieldAppSession.selectedOutlet = null;
+            document.getElementById('mob-sub-login').classList.remove('hidden');
+            document.getElementById('mob-sub-scoping').classList.add('hidden');
+            document.getElementById('mob-sub-workspace').classList.add('hidden');
+        }
+
+        function launchFieldForm(type) {
+            selectedEventType = type;
+            document.getElementById('mob-sub-workspace').classList.add('hidden');
+            document.getElementById('mob-sub-form').classList.remove('hidden');
+
+            document.getElementById('mob-form-crm').classList.toggle('hidden', type === 'TestOnly');
+            document.getElementById('mob-form-dropout').classList.toggle('hidden', type !== 'Lead');
+            document.getElementById('mob-form-prescription').classList.toggle('hidden', type === 'TestOnly');
+
+            // Populate prescriptions select list values dynamically matching catalog configuration preset
+            const ret = state.retailers.find(r => r.id === fieldAppSession.selectedOutlet?.retailerId);
+            const pr = presets[ret?.presetId || 'preset-9'];
+            const selectLeft = document.getElementById('mob-form-left-sphere');
+            const selectRight = document.getElementById('mob-form-right-sphere');
+            selectLeft.innerHTML = ""; selectRight.innerHTML = "";
+            pr.forEach(pow => {
+                selectLeft.innerHTML += `<option value="${pow}">${pow}</option>`;
+                selectRight.innerHTML += `<option value="${pow}">${pow}</option>`;
+            });
+        }
+
+        function closeFieldForm() {
+            document.getElementById('mob-sub-form').classList.add('hidden');
+            document.getElementById('mob-sub-workspace').classList.remove('hidden');
+        }
+
+        function matchFieldAppFormLeftToRight() {
+            document.getElementById('mob-form-right-sphere').value = document.getElementById('mob-form-left-sphere').value;
+            document.getElementById('mob-form-right-cylinder').value = document.getElementById('mob-form-left-cylinder').value;
+        }
+
+        function submitFieldAppForm() {
+            const name = document.getElementById('mob-form-name').value.trim();
+            const phone = document.getElementById('mob-form-phone').value.trim();
+            if (selectedEventType !== 'TestOnly' && (!name || !phone)) return;
+
+            const record = {
+                id: 'evt-' + Math.random().toString(36).substr(2, 9),
+                eventDate: new Date().toISOString().split('T')[0],
+                retailPointId: fieldAppSession.selectedOutlet.id,
+                age: parseInt(document.getElementById('mob-form-age').value),
+                gender: document.getElementById('mob-form-gender').value,
+                leftEyeDiopter: { sph: document.getElementById('mob-form-left-sphere').value, cyl: document.getElementById('mob-form-left-cylinder').value },
+                rightEyeDiopter: { sph: document.getElementById('mob-form-right-sphere').value, cyl: document.getElementById('mob-form-right-cylinder').value },
+                eventType: selectedEventType,
+                customerName: name || null,
+                phone: phone || null,
+                isFulfilled: false
+            };
+
+            if (fieldAppSession.isOnline) {
+                state.consultations.unshift(record);
+                saveState();
+            } else {
+                state.localQueue.push(record);
+            }
+
+            document.getElementById('mob-form-name').value = "";
+            document.getElementById('mob-form-phone').value = "";
+            
+            updateLocalQueueUI();
+            closeFieldForm();
+        }
+
+        function toggleFieldAppNetwork() {
+            fieldAppSession.isOnline = !fieldAppSession.isOnline;
+            const bar = document.getElementById('fieldapp-netbar');
+            bar.className = fieldAppSession.isOnline ? "bg-brand-green text-white px-4 py-2 flex items-center justify-between text-[10px] font-black uppercase tracking-wider" : "bg-brand-yellow text-black px-4 py-2 flex items-center justify-between text-[10px] font-black uppercase tracking-wider";
+            bar.querySelector('span').textContent = fieldAppSession.isOnline ? "Online • Sync Enabled" : "Offline &bull; Queue Active";
+            updateLocalQueueUI();
+        }
+
+        function updateLocalQueueUI() {
+            const count = state.localQueue.length;
+            document.getElementById('mob-sync-queue-count').textContent = count;
+            const btn = document.getElementById('mob-sync-btn');
+            btn.disabled = count === 0 || !fieldAppSession.isOnline;
+        }
+
+        function triggerFieldAppSync() {
+            if (!fieldAppSession.isOnline) return;
+            state.localQueue.forEach(localRecord => {
+                state.consultations.unshift(localRecord);
+            });
+            state.localQueue = [];
+            saveState();
+            updateLocalQueueUI();
+        }
+    </script>
+</body>
+</html>

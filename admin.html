@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DotGlasses - Admin &amp; MI Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for modern geometric typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Lexend', sans-serif;
+            background-color: #EFEADF; /* Brand Beige */
+            color: #000000;
+        }
+        .bg-brand-beige { background-color: #EFEADF; }
+        .bg-brand-orange { background-color: #F96715; }
+        .text-brand-orange { color: #F96715; }
+        .border-brand-orange { border-color: #F96715; }
+        .bg-brand-yellow { background-color: #FFB600; }
+        .bg-brand-green { background-color: #234833; }
+        .text-brand-green { color: #234833; }
+        .bg-brand-blue { background-color: #4287C6; }
+        .text-brand-blue { color: #4287C6; }
+        .bg-brand-pink { background-color: #FF85BC; }
+        .text-brand-pink { color: #FF85BC; }
+
+        .highlighter-orange {
+            position: relative;
+            z-index: 1;
+        }
+        .highlighter-orange::after {
+            content: '';
+            position: absolute;
+            left: -4px;
+            right: -4px;
+            bottom: 2px;
+            height: 38%;
+            background-color: #F96715;
+            opacity: 0.25;
+            z-index: -1;
+            border-radius: 9999px;
+        }
+        .dot-pattern {
+            background-image: radial-gradient(#F96715 2px, transparent 2px);
+            background-size: 16px 16px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row antialiased overflow-x-hidden">
+
+    <!-- Mobile Header Navigation -->
+    <header class="md:hidden bg-black text-white px-4 py-3 flex justify-between items-center border-b-4 border-brand-orange z-40">
+        <div class="flex items-center space-x-2 bg-white px-2 py-1 rounded-lg">
+            <svg width="100" height="28" viewBox="0 0 120 35" fill="none" class="font-extrabold text-black">
+                <text x="5" y="26" font-family="'Lexend', sans-serif" font-size="28" fill="black">D</text>
+                <circle cx="34" cy="18" r="7" fill="#F96715" />
+                <text x="44" y="26" font-family="'Lexend', sans-serif" font-size="28" fill="black">T</text>
+                <text x="5" y="34" font-family="'Lexend', sans-serif" font-size="10" fill="black" letter-spacing="2">GLASSES</text>
+            </svg>
+        </div>
+        <button onclick="toggleMobileSidebar()" class="text-white hover:text-brand-orange focus:outline-none">
+            <i data-lucide="menu" id="mobile-menu-icon" class="w-6 h-6"></i>
+        </button>
+    </header>
+
+    <!-- Side Navigation Menu -->
+    <nav id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out bg-black text-white w-64 flex flex-col border-r-4 border-brand-orange z-50 shadow-2xl h-screen sticky top-0 shrink-0">
+        <div class="p-6 border-b border-gray-900 flex flex-col items-center relative">
+            <a href="index.html" class="absolute left-4 top-4 text-gray-500 hover:text-brand-orange transition" title="Return to Gateway">
+                <i data-lucide="arrow-left" class="w-4.5 h-4.5"></i>
+            </a>
+            <div class="bg-white p-3 rounded-2xl w-full flex justify-center mb-2 mt-2">
+                <svg width="140" height="40" viewBox="0 0 120 35" fill="none" class="font-extrabold text-black">
+                    <text x="5" y="26" font-family="'Lexend', sans-serif" font-size="28" fill="black" letter-spacing="-1">D</text>
+                    <circle cx="34" cy="18" r="7" fill="#F96715" />
+                    <text x="44" y="26" font-family="'Lexend', sans-serif" font-size="28" fill="black" letter-spacing="-1">T</text>
+                    <text x="5" y="34" font-family="'Lexend', sans-serif" font-size="10" fill="black" letter-spacing="2">GLASSES</text>
+                </svg>
+            </div>
+            <span class="text-[9px] uppercase tracking-widest text-gray-500 font-extrabold text-center">See Better. Live Better.</span>
+        </div>
+
+        <div class="flex-grow py-4 overflow-y-auto space-y-1 px-3">
+            <button onclick="navigateView('reporting')" id="nav-reporting" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-extrabold tracking-wide uppercase transition duration-200 text-gray-400 hover:text-white hover:bg-gray-950">
+                <i data-lucide="layout-dashboard" class="w-4.5 h-4.5"></i>
+                <span>MI Reporting</span>
+            </button>
+            
+            <!-- Collapsible Organisation Menu Group -->
+            <div class="space-y-1">
+                <button onclick="toggleOrgSubMenu()" id="nav-organisations" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-extrabold tracking-wide uppercase transition duration-200 text-gray-400 hover:text-white hover:bg-gray-950">
+                    <i data-lucide="git-branch" class="w-4.5 h-4.5"></i>
+                    <span>Organisations</span>
+                    <i data-lucide="chevron-down" id="org-chevron" class="w-4 h-4 ml-auto transition-transform duration-200"></i>
+                </button>
+                <div id="org-sub-menu" class="pl-6 pr-2 py-1 space-y-1 text-xs font-bold text-gray-400">
+                    <button onclick="navigateView('organisations'); drillToCountries();" id="sub-nav-countries" class="w-full flex items-center justify-between py-1.5 px-3 rounded-lg hover:text-white hover:bg-gray-900 transition text-left">
+                        <span>Countries</span>
+                        <span id="sub-nav-countries-count" class="bg-gray-800 text-gray-400 text-[10px] px-1.5 py-0.2 rounded-full">0</span>
+                    </button>
+                    <button onclick="navigateView('organisations'); showAllRetailersView();" id="sub-nav-retailers" class="w-full flex items-center justify-between py-1.5 px-3 rounded-lg hover:text-white hover:bg-gray-900 transition text-left">
+                        <span>Retailers</span>
+                        <span id="sub-nav-retailers-count" class="bg-gray-800 text-gray-400 text-[10px] px-1.5 py-0.2 rounded-full">0</span>
+                    </button>
+                    <button onclick="navigateView('organisations'); showAllOutletsView();" id="sub-nav-outlets" class="w-full flex items-center justify-between py-1.5 px-3 rounded-lg hover:text-white hover:bg-gray-900 transition text-left">
+                        <span>Outlets (Points)</span>
+                        <span id="sub-nav-outlets-count" class="bg-gray-800 text-gray-400 text-[10px] px-1.5 py-0.2 rounded-full">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="navigateView('users')" id="nav-users" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-extrabold tracking-wide uppercase transition duration-200 text-gray-400 hover:text-white hover:bg-gray-950">
+                <i data-lucide="users" class="w-4.5 h-4.5"></i>
+                <span>User Directory</span>
+            </button>
+            <button onclick="navigateView('catalogues')" id="nav-catalogues" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-extrabold tracking-wide uppercase transition duration-200 text-gray-400 hover:text-white hover:bg-gray-950">
+                <i data-lucide="layout-grid" class="w-4.5 h-4.5"></i>
+                <span>Preset Catalogues</span>
+            </button>
+            <button onclick="navigateView('custom-orders')" id="nav-custom-orders" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-extrabold tracking-wide uppercase transition duration-200 text-gray-400 hover:text-white hover:bg-gray-950">
+                <i data-lucide="wrench" class="w-4.5 h-4.5"></i>
+                <span>Custom Orders</span>
+                <span id="custom-badge" class="ml-auto bg-brand-pink text-black text-[9px] font-black px-1.5 py-0.5 rounded-full hidden">0</span>
+            </button>
+        </div>
+
+        <div class="p-4 border-t border-gray-900 space-y-3">
+            <div class="flex items-center space-x-2">
+                <div class="w-7 h-7 bg-brand-orange text-white rounded-full flex items-center justify-center font-black text-xs">BH</div>
+                <div class="truncate">
+                    <p class="text-xxs font-black uppercase tracking-wide leading-none">Bradley Heslop</p>
+                    <span class="text-[9px] font-semibold text-gray-500 uppercase tracking-widest leading-none">Global Admin</span>
+                </div>
+            </div>
+            <button onclick="resetData()" class="w-full bg-gray-950 hover:bg-gray-900 border border-gray-800 text-gray-400 text-xxs font-extrabold uppercase py-2 rounded-lg transition duration-200">
+                Clear All Logs
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Canvas -->
+    <div class="flex-grow flex flex-col min-h-screen overflow-y-auto">
+        <header class="bg-white border-b-2 border-black px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 z-30">
+            <div>
+                <span class="text-xxs font-extrabold text-gray-400 uppercase tracking-widest">Portal Core</span>
+                <h2 id="view-title-breadcrumb" class="text-base font-extrabold uppercase tracking-wide">MI Reporting Dashboard</h2>
+            </div>
+            <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+                <button onclick="openLogConsultationModal()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl font-extrabold text-xs tracking-wider uppercase transition-all duration-300 bg-brand-orange text-white border-2 border-brand-orange hover:bg-black hover:border-black hover:text-white">
+                    <i data-lucide="plus-circle" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>Log Consultation
+                </button>
+                <a href="index.html" class="px-4 py-2.5 rounded-xl font-extrabold text-xs uppercase bg-gray-100 hover:bg-gray-200 text-black border-2 border-black transition">
+                    Exit Portal
+                </a>
+            </div>
+        </header>
+
+        <div class="p-4 md:p-6 space-y-6 flex-grow">
+            <!-- MI Reporting Workspace View -->
+            <div id="view-section-reporting" class="space-y-6 hidden">
+                <div class="bg-white p-4 rounded-2xl border-4 border-black flex flex-wrap gap-4 items-center justify-between shadow-md">
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-brand-orange text-white p-1.5 rounded-lg"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i></span>
+                        <h3 class="font-extrabold text-xs uppercase tracking-wider">Dynamic Directory Slicing</h3>
+                    </div>
+                    <div class="flex flex-wrap gap-2 w-full lg:w-auto">
+                        <select id="filter-country" onchange="applyFilters()" class="bg-brand-beige border-2 border-black rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-brand-orange">
+                            <option value="All">All Countries</option>
+                            <option value="Kenya">Kenya Operations</option>
+                            <option value="Rwanda">Rwanda Operations</option>
+                            <option value="Ethiopia">Ethiopia Operations</option>
+                        </select>
+                        <select id="filter-retailer" onchange="applyFilters()" class="bg-brand-beige border-2 border-black rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-brand-orange">
+                            <option value="All">All Retailers</option>
+                            <option value="Halons Pharmacy Chain">Halons Pharmacy Chain</option>
+                            <option value="Amani Mission Clinics">Amani Mission Clinics</option>
+                            <option value="Independent Micro-Agents">Independent Micro-Agents</option>
+                        </select>
+                        <select id="filter-type" onchange="applyFilters()" class="bg-brand-beige border-2 border-black rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-brand-orange">
+                            <option value="All">All Location Types</option>
+                            <option value="Physical">Physical Storefronts</option>
+                            <option value="MobileAgent">Mobile Micro-Agents</option>
+                            <option value="Outreach">Outreach Pop-ups</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border-4 border-black shadow-md">
+                        <span class="text-xxs uppercase tracking-wider text-gray-500 font-extrabold block mb-1">Total Tests</span>
+                        <h2 id="stat-tests" class="text-3xl font-black tracking-tight">0</h2>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border-4 border-black shadow-md">
+                        <span class="text-xxs uppercase tracking-wider text-gray-500 font-extrabold block mb-1">Pending Leads</span>
+                        <h2 id="stat-leads" class="text-3xl font-black tracking-tight">0</h2>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border-4 border-black shadow-md">
+                        <span class="text-xxs uppercase tracking-wider text-gray-500 font-extrabold block mb-1">Standard Sales</span>
+                        <h2 id="stat-sales" class="text-3xl font-black text-brand-orange tracking-tight">0</h2>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border-4 border-black shadow-md">
+                        <span class="text-xxs uppercase tracking-wider text-gray-500 font-extrabold block mb-1">Custom Lenses</span>
+                        <h2 id="stat-custom" class="text-3xl font-black text-brand-blue tracking-tight">0</h2>
+                    </div>
+                    <div class="col-span-2 lg:col-span-1 bg-brand-green text-white p-5 rounded-2xl border-4 border-black shadow-md">
+                        <span class="text-xxs uppercase tracking-wider text-gray-300 font-extrabold block mb-1">Test-To-Sale Conversion</span>
+                        <h2 id="stat-conversion" class="text-3xl font-black text-brand-yellow tracking-tight">0%</h2>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <div class="xl:col-span-2 bg-white p-6 rounded-2xl border-4 border-black shadow-md space-y-4">
+                        <h3 class="font-extrabold text-sm uppercase tracking-wider border-b pb-3">Consultation Event Stream</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b-2 border-black font-extrabold text-xs text-gray-500 uppercase">
+                                        <th class="py-2.5">GUID</th>
+                                        <th class="py-2.5">Sync Date</th>
+                                        <th class="py-2.5">Patient Details</th>
+                                        <th class="py-2.5 text-center">Age/Gender</th>
+                                        <th class="py-2.5">Prescription</th>
+                                        <th class="py-2.5 text-right">Event Class</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="event-ledger-rows" class="text-xs font-semibold text-gray-700"></tbody>
+                            </table>
+                            <div id="no-events-indicator" class="text-center py-12 text-gray-500 font-semibold space-y-2 hidden">
+                                <i data-lucide="inbox" class="w-10 h-10 mx-auto text-gray-400"></i>
+                                <p class="text-xs">No records mapped under these filter criteria.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-black text-white p-6 rounded-2xl border-4 border-black relative overflow-hidden shadow-lg">
+                            <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-brand-pink opacity-25 rounded-full dot-pattern"></div>
+                            <h3 class="font-extrabold text-xs uppercase tracking-wider mb-4 highlighter-orange inline-block text-white">Live Demographic Insights</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-[10px] font-extrabold uppercase mb-1.5">
+                                        <span>Tested-To-Sale Ratio</span>
+                                        <span id="mi-conv-percent" class="text-brand-orange">0%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-800 h-2.5 rounded-full overflow-hidden">
+                                        <div id="mi-conv-bar" class="bg-brand-orange h-full transition-all duration-300" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div class="border-t border-gray-800 pt-4">
+                                    <h4 class="text-[10px] font-extrabold uppercase mb-2 text-gray-400">Patient Gender Representation</h4>
+                                    <div class="flex items-center text-[10px] font-black uppercase text-black">
+                                        <div id="mi-gender-male-bar" class="bg-brand-blue p-1.5 text-center rounded-l-md transition-all duration-300" style="width: 50%">M: 0%</div>
+                                        <div id="mi-gender-female-bar" class="bg-brand-pink p-1.5 text-center rounded-r-md transition-all duration-300" style="width: 50%">F: 0%</div>
+                                    </div>
+                                </div>
+                                <div class="border-t border-gray-800 pt-4">
+                                    <h4 class="text-[10px] font-extrabold uppercase mb-2 text-gray-400">Activity Distribution By Endpoint Class</h4>
+                                    <div class="space-y-2 text-xs font-bold">
+                                        <div class="flex justify-between items-center text-gray-300">
+                                            <span class="flex items-center"><span class="w-2.5 h-2.5 bg-brand-orange rounded-full mr-2"></span>Physical Storefronts</span>
+                                            <span id="mi-type-physical">0%</span>
+                                        </div>
+                                        <div class="flex justify-between items-center text-gray-300">
+                                            <span class="flex items-center"><span class="w-2.5 h-2.5 bg-brand-pink rounded-full mr-2"></span>Mobile Micro-Agents</span>
+                                            <span id="mi-type-mobile">0%</span>
+                                        </div>
+                                        <div class="flex justify-between items-center text-gray-300">
+                                            <span class="flex items-center"><span class="w-2.5 h-2.5 bg-brand-yellow rounded-full mr-2"></span>Outreach Pop-ups</span>
+                                            <span id="mi-type-outreach">0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organisations Workspace View -->
+            <div id="view-section-organisations" class="space-y-6 hidden">
+                <div class="flex items-center space-x-2 text-xs font-bold text-gray-600 bg-white p-4 rounded-2xl border-2 border-black shadow-sm">
+                    <button onclick="drillToCountries()" class="hover:text-brand-orange flex items-center space-x-1">
+                        <i data-lucide="globe" class="w-3.5 h-3.5 inline"></i>
+                        <span>ALL COUNTRIES</span>
+                    </button>
+                    <span id="breadcrumb-sep-1" class="text-gray-300 hidden">/</span>
+                    <button id="breadcrumb-country" onclick="drillToSelectedCountry()" class="hover:text-brand-orange uppercase text-black hidden"></button>
+                    <span id="breadcrumb-sep-2" class="text-gray-300 hidden">/</span>
+                    <span id="breadcrumb-retailer" class="uppercase text-black hidden font-extrabold"></span>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-white p-6 rounded-2xl border-4 border-black shadow-md space-y-4">
+                            <div class="flex items-center justify-between border-b pb-3 border-gray-100">
+                                <h3 id="org-stage-title" class="font-black text-sm uppercase tracking-wider">Loading Directory Tiers...</h3>
+                                <span id="org-stage-pill" class="text-[9px] font-black uppercase bg-black text-white px-2 py-0.5 rounded-full">Countries</span>
+                            </div>
+                            <div id="org-stage-output-container"></div>
+                        </div>
+                    </div>
+                    <div id="org-action-panel" class="space-y-6"></div>
+                </div>
+            </div>
+
+            <!-- Users Directory Workspace -->
+            <div id="view-section-users" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border-4 border-black shadow-md space-y-6">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+                        <div>
+                            <h3 class="font-extrabold text-sm uppercase tracking-wider">Linear Role Directory</h3>
+                            <p class="text-xs font-semibold text-gray-500">Manage internal permissions matching .NET Identity roles mapped inside hierarchy layers.</p>
+                        </div>
+                        <button onclick="openAddUserModal()" class="bg-brand-orange text-white text-xs font-black px-4 py-2.5 rounded-xl hover:bg-black transition uppercase">
+                            <i data-lucide="user-plus" class="inline-block w-4 h-4 mr-1.5 -mt-0.5"></i>Invite Platform User
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b-2 border-black font-extrabold text-xs text-gray-500 uppercase">
+                                    <th class="py-2.5">User Identity</th>
+                                    <th class="py-2.5">Identity Role</th>
+                                    <th class="py-2.5">Organisational Scope Boundary</th>
+                                    <th class="py-2.5">Active Assignment</th>
+                                    <th class="py-2.5 text-right">Directory State</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-directory-rows" class="text-xs font-semibold text-gray-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Catalogues Workspace -->
+            <div id="view-section-catalogues" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border-4 border-black shadow-md space-y-6">
+                    <div class="border-b-2 border-gray-200 pb-3">
+                        <h3 class="font-extrabold text-sm uppercase tracking-wider">Wholesale Preset Catalogues</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="border-2 border-black p-4 rounded-xl bg-brand-beige">
+                            <h4 class="font-extrabold text-xs uppercase tracking-wider text-brand-orange">6-Lens Preset</h4>
+                            <p class="text-[11px] font-semibold text-gray-600 mt-2">Covers 75% of basic cases. Astigmatism is locked to 0.00.</p>
+                        </div>
+                        <div class="border-2 border-black p-4 rounded-xl bg-brand-yellow/20">
+                            <h4 class="font-extrabold text-xs uppercase tracking-wider text-black">9-Lens Preset</h4>
+                            <p class="text-[11px] font-semibold text-gray-700 mt-2">Standard active catalog distribution with cylinder corrections.</p>
+                        </div>
+                        <div class="border-2 border-black p-4 rounded-xl bg-brand-green text-white">
+                            <h4 class="font-extrabold text-xs uppercase tracking-wider text-brand-yellow">Classical Optician</h4>
+                            <p class="text-[11px] font-semibold text-gray-300 mt-2">Full professional eye care toolset mapping.</p>
+                        </div>
+                    </div>
+                    <div class="bg-brand-beige p-5 rounded-xl border-2 border-black space-y-4">
+                        <h4 class="font-extrabold text-xs uppercase tracking-wider text-gray-700">Push Wholesale Presets Catalogue Mapping</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <select id="map-preset-retailer-cat" class="w-full bg-white border-2 border-black rounded-lg p-2 text-xs font-bold focus:outline-none"></select>
+                            </div>
+                            <div>
+                                <select id="map-preset-package-cat" class="w-full bg-white border-2 border-black rounded-lg p-2 text-xs font-bold focus:outline-none">
+                                    <option value="preset-6">6-Lens Preset (Base)</option>
+                                    <option value="preset-9" selected>9-Lens Preset (Standard)</option>
+                                    <option value="preset-classical">Classical Optician</option>
+                                </select>
+                            </div>
+                            <div>
+                                <button onclick="savePresetMappingCat()" class="w-full bg-black text-white hover:bg-brand-orange py-2 rounded-lg text-xs font-black transition duration-200 uppercase">
+                                    Publish Preset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Orders Workspace -->
+            <div id="view-section-custom-orders" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border-4 border-black shadow-md space-y-4">
+                    <h3 class="font-extrabold text-sm uppercase tracking-wider border-b pb-3">Custom Laboratory Prescription Dispatch</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b-2 border-black font-extrabold text-xs text-gray-500 uppercase">
+                                    <th class="py-2.5">Customer details</th>
+                                    <th class="py-2.5">Retail Source Outlet</th>
+                                    <th class="py-2.5">Prescription</th>
+                                    <th class="py-2.5">Fulfillment Status</th>
+                                    <th class="py-2.5 text-right">Update Order</th>
+                                </tr>
+                            </thead>
+                            <tbody id="custom-orders-rows" class="text-xs font-semibold text-gray-700"></tbody>
+                        </table>
+                        <div id="no-custom-indicator" class="text-center py-12 text-gray-500 font-semibold space-y-2 hidden">
+                            <i data-lucide="check-circle" class="w-10 h-10 mx-auto text-brand-green"></i>
+                            <p class="text-xs">All clear! No custom prescription requests require laboratory machining.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- LOG DIALOG MODAL -->
+    <div id="log-consultation-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white border-4 border-black rounded-3xl max-w-lg w-full overflow-hidden flex flex-col relative shadow-2xl">
+            <div class="bg-black text-white px-6 py-4 flex justify-between items-center border-b-2 border-brand-orange">
+                <h3 class="font-extrabold text-sm uppercase tracking-wide">Log Field Consultation Event</h3>
+                <button onclick="closeLogConsultationModal()" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4 max-h-[400px]">
+                <div>
+                    <label class="block text-xxs font-extrabold uppercase text-gray-500 tracking-wider mb-1">Select Point of Origin</label>
+                    <select id="field-retail-point" onchange="updateModalCatalogDropdowns()" class="w-full bg-brand-beige border-2 border-black rounded-xl p-2.5 text-xs font-bold focus:outline-none"></select>
+                </div>
+                <div>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="setEventType('TestOnly')" id="evt-btn-TestOnly" class="py-2 rounded-lg border-2 border-black font-extrabold text-xxs text-center transition bg-brand-pink text-black">TEST ONLY</button>
+                        <button onclick="setEventType('Lead')" id="evt-btn-Lead" class="py-2 rounded-lg border-2 border-black font-extrabold text-xxs text-center transition bg-white">LEAD</button>
+                        <button onclick="setEventType('Sale')" id="evt-btn-Sale" class="py-2 rounded-lg border-2 border-black font-extrabold text-xxs text-center transition bg-white">SALE</button>
+                        <button onclick="setEventType('CustomOrder')" id="evt-btn-CustomOrder" class="py-2 rounded-lg border-2 border-black font-extrabold text-xxs text-center transition bg-white">CUSTOM</button>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-xl border-2 border-black space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <select id="field-age" class="w-full bg-white border rounded p-2 text-xs font-bold focus:outline-none">
+                                <option value="28" selected>Young Adult (18-35)</option>
+                                <option value="58">Middle-Age (51-65)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="field-gender" class="w-full bg-white border rounded p-2 text-xs font-bold focus:outline-none">
+                                <option value="Female">Female</option>
+                                <option value="Male">Male</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div id="crm-block" class="bg-brand-yellow/10 p-4 rounded-xl border-2 border-black space-y-3 hidden">
+                    <input type="text" id="field-name" placeholder="Enter patient name" class="w-full border rounded p-2 text-xs font-bold">
+                    <input type="tel" id="field-phone" placeholder="Contact number" class="w-full border rounded p-2 text-xs font-bold">
+                </div>
+                <div id="dropout-block" class="bg-brand-pink/10 p-4 rounded-xl border-2 border-black hidden">
+                    <select id="field-dropout" class="w-full border rounded p-2 text-xs font-bold">
+                        <option value="Awaiting pay day">Awaiting monthly pay day</option>
+                    </select>
+                </div>
+                <div id="product-block" class="bg-brand-blue/10 p-4 rounded-xl border-2 border-black space-y-3 hidden">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <select id="field-left-sphere" class="w-full border rounded p-1 text-xs font-bold"></select>
+                            <select id="field-left-cylinder" class="w-full border rounded p-1 text-xs font-bold mt-2">
+                                <option value="0.00">0.00 (Std)</option>
+                                <option value="-1.00">-1.00</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="field-right-sphere" class="w-full border rounded p-1 text-xs font-bold"></select>
+                            <select id="field-right-cylinder" class="w-full border rounded p-1 text-xs font-bold mt-2">
+                                <option value="0.00">0.00 (Std)</option>
+                                <option value="-1.00">-1.00</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" onclick="matchPrescriptionLeftToRight()" class="w-full bg-white border py-1 rounded text-xxs font-extrabold uppercase mt-2">Copy Left Specs to Right</button>
+                </div>
+            </div>
+            <div class="bg-gray-50 p-4 border-t-2 border-black flex space-x-2">
+                <button onclick="submitFieldEvent()" class="flex-grow bg-black text-white py-3 rounded-lg text-xs font-black uppercase hover:bg-brand-orange">Process Record</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ONBOARD OUTLET MODAL -->
+    <div id="add-point-modal" class="fixed inset-0 bg-black/55 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white border-4 border-black rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+            <h3 class="font-extrabold text-sm uppercase tracking-wider">Onboard New Retail Point</h3>
+            <div class="space-y-3">
+                <select id="modal-point-retailer-select" class="w-full border-2 border-black rounded-lg p-2.5 text-xs font-bold focus:outline-none"></select>
+                <input type="text" id="modal-point-name" placeholder="e.g. Kakamega Clinic" class="w-full border-2 border-black rounded-lg p-2.5 text-xs font-bold focus:outline-none">
+                <select id="modal-point-type" class="w-full border-2 border-black rounded-lg p-2.5 text-xs font-bold focus:outline-none">
+                    <option value="Physical">Physical Storefront</option>
+                    <option value="MobileAgent">Mobile Micro-Agent</option>
+                </select>
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="submitNewPoint()" class="flex-grow bg-black text-white py-2 rounded-lg text-xs font-black uppercase">Save Outlet</button>
+                <button onclick="closeAddPointModal()" class="bg-gray-200 text-black py-2 px-4 rounded-lg text-xs font-extrabold">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="custom-alert-toast" class="fixed bottom-4 right-4 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-black text-white border-2 border-brand-orange px-5 py-3.5 rounded-xl shadow-lg flex items-center space-x-3">
+        <span id="alert-toast-icon-box" class="bg-brand-orange p-1.5 rounded-lg text-black">
+            <i data-lucide="check-circle" class="w-5 h-5"></i>
+        </span>
+        <div>
+            <h4 id="alert-toast-title" class="text-xs font-black uppercase">Update Recorded</h4>
+            <p id="alert-toast-desc" class="text-[10px] text-gray-300 font-semibold"></p>
+        </div>
+    </div>
+
+    <!-- Dynamic Storage & System State Engine -->
+    <script>
+        // Sync platform state from browser storage or load default datasets
+        let state = JSON.parse(localStorage.getItem('dotglasses_state')) || {
+            retailPoints: [
+                { id: "rp-1", name: "Nairobi East Pharmacy", retailerId: "ret-1", type: "Physical" },
+                { id: "rp-2", name: "Kisumu Central Outreach", retailerId: "ret-1", type: "Outreach" },
+                { id: "rp-3", name: "Mombasa Mobile Agent #4", retailerId: "ret-2", type: "MobileAgent" },
+                { id: "rp-4", name: "Eldoret Medical Hub", retailerId: "ret-1", type: "Physical" }
+            ],
+            retailers: [
+                { id: "ret-1", name: "Halons Pharmacy Chain", countryOfficeId: "co-1", presetId: "preset-9" },
+                { id: "ret-2", name: "Amani Mission Clinics", countryOfficeId: "co-1", presetId: "preset-6" },
+                { id: "ret-3", name: "Independent Micro-Agents", countryOfficeId: "co-2", presetId: "preset-9" }
+            ],
+            countryOffices: [
+                { id: "co-1", name: "Kenya Operations", region: "East Africa" },
+                { id: "co-2", name: "Ethiopia Operations", region: "Horn of Africa" },
+                { id: "co-3", name: "Rwanda Operations", region: "East Africa" }
+            ],
+            users: [
+                { id: "usr-1", name: "Bradley Heslop", email: "bradley@dotglasses.org", role: "GlobalAdmin", scopeId: null, scopeType: "DGI", isActive: true },
+                { id: "usr-2", name: "Joseph Ellis", email: "joe@jellis.tech", role: "CountryManager", scopeId: "co-1", scopeType: "CountryOffice", isActive: true },
+                { id: "usr-3", name: "Paul K.", email: "paul@rwandacare.org", role: "CountryManager", scopeId: "co-3", scopeType: "CountryOffice", isActive: true },
+                { id: "usr-4", name: "Winfred N.", email: "winfred@halons.com", role: "RetailerAdmin", scopeId: "ret-1", scopeType: "Retailer", isActive: true },
+                { id: "usr-5", name: "Sister Beatrice", email: "beatrice@amani.org", role: "RetailerAdmin", scopeId: "ret-2", scopeType: "Retailer", isActive: true },
+                { id: "usr-6", name: "Kipchoge Keino", email: "kipchoge@kisumu-vision.com", role: "FieldUser", scopeId: "rp-2", scopeType: "RetailPoint", isActive: true }
+            ],
+            consultations: [
+                { id: "evt-init-1", eventDate: "2026-07-01", fieldUserId: "usr-6", retailPointId: "rp-1", age: 48, gender: "Female", leftEyeDiopter: {sph: "-1.00", cyl: "0.00"}, rightEyeDiopter: {sph: "-1.00", cyl: "0.00"}, eventType: "Sale", customerName: "Sarah Wanjiku", phone: "+254 722 112233" },
+                { id: "evt-init-2", eventDate: "2026-07-02", fieldUserId: "usr-6", retailPointId: "rp-2", age: 67, gender: "Female", leftEyeDiopter: {sph: "-4.00", cyl: "-1.00"}, rightEyeDiopter: {sph: "-3.00", cyl: "-0.50"}, eventType: "CustomOrder", customerName: "Eunice Atieno", phone: "+254 733 445566", isFulfilled: false }
+            ],
+            localQueue: []
+        };
+
+        function saveState() {
+            localStorage.setItem('dotglasses_state', JSON.stringify(state));
+        }
+
+        let orgDrillState = { level: 'countries', selectedCountryId: null, selectedRetailerId: null };
+        let isOrgSubMenuExpanded = true;
+        let selectedEventType = 'TestOnly';
+
+        window.onload = function() {
+            lucide.createIcons();
+            updateDashboardMetrics();
+            renderActiveViewData();
+            populateOrgModalSelectors();
+            populateModalSelectors();
+        };
+
+        function toggleOrgSubMenu() {
+            const menu = document.getElementById('org-sub-menu');
+            const chevron = document.getElementById('org-chevron');
+            isOrgSubMenuExpanded = !isOrgSubMenuExpanded;
+            menu.classList.toggle('hidden', !isOrgSubMenuExpanded);
+            chevron.style.transform = isOrgSubMenuExpanded ? 'rotate(0deg)' : 'rotate(-90deg)';
+        }
+
+        function navigateView(viewId) {
+            currentActiveView = viewId;
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.className = item.id === `nav-${viewId}` ? 
+                    "nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-extrabold uppercase transition bg-brand-orange text-white" :
+                    "nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-extrabold uppercase transition text-gray-400 hover:text-white hover:bg-gray-950";
+            });
+
+            const sections = ['reporting', 'organisations', 'users', 'catalogues', 'custom-orders'];
+            sections.forEach(sec => {
+                document.getElementById(`view-section-${sec}`).classList.toggle('hidden', sec !== viewId);
+            });
+
+            document.getElementById('view-title-breadcrumb').textContent = {
+                'reporting': 'MI Reporting Dashboard',
+                'organisations': 'Organisation Hierarchy Explorer',
+                'users': 'Identity Directory',
+                'catalogues': 'Catalogue Pricing & Presets',
+                'custom-orders': 'Custom Laboratory Dispatch'
+            }[viewId];
+
+            renderActiveViewData();
+        }
+
+        function renderActiveViewData() {
+            document.getElementById('sub-nav-countries-count').textContent = state.countryOffices.length;
+            document.getElementById('sub-nav-retailers-count').textContent = state.retailers.length;
+            document.getElementById('sub-nav-outlets-count').textContent = state.retailPoints.length;
+
+            if (currentActiveView === 'reporting') renderEventLedger();
+            if (currentActiveView === 'organisations') renderOrganisationalWorkspace();
+            if (currentActiveView === 'users') renderUserDirectory();
+            if (currentActiveView === 'catalogues') renderCataloguesManager();
+            if (currentActiveView === 'custom-orders') renderCustomOrders();
+        }
+
+        function renderEventLedger() {
+            const rowContainer = document.getElementById('event-ledger-rows');
+            rowContainer.innerHTML = "";
+            const activeCountry = document.getElementById('filter-country').value;
+            const activeRetailer = document.getElementById('filter-retailer').value;
+            const activeType = document.getElementById('filter-type').value;
+
+            const filtered = state.consultations.filter(event => {
+                const rp = state.retailPoints.find(p => p.id === event.retailPointId);
+                if (!rp) return false;
+                const ret = state.retailers.find(r => r.id === rp.retailerId);
+                const co = state.countryOffices.find(c => c.id === ret?.countryOfficeId);
+
+                if (activeCountry !== 'All' && co?.name !== activeCountry) return false;
+                if (activeRetailer !== 'All' && ret?.name !== activeRetailer) return false;
+                if (activeType !== 'All' && rp.type !== activeType) return false;
+                return true;
+            });
+
+            document.getElementById('no-events-indicator').classList.toggle('hidden', filtered.length > 0);
+
+            filtered.forEach(event => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-gray-100 hover:bg-gray-50 transition";
+                const rp = state.retailPoints.find(p => p.id === event.retailPointId);
+                const rx = event.leftEyeDiopter ? `L: ${event.leftEyeDiopter.sph} / R: ${event.rightEyeDiopter.sph}` : 'N/A';
+
+                tr.innerHTML = `
+                    <td class="py-3 font-mono text-[9px] text-gray-400 select-all">${event.id.substring(0, 10)}...</td>
+                    <td class="py-3 text-gray-500 font-bold">${event.eventDate}</td>
+                    <td class="py-3 font-bold uppercase text-xxs">${event.customerName || 'Anonymous Test'}</td>
+                    <td class="py-3 text-center text-gray-700 font-bold">${event.age} yrs / ${event.gender === 'Female' ? 'F' : 'M'}</td>
+                    <td class="py-3 font-mono font-bold text-gray-700">${rx}</td>
+                    <td class="py-3 text-right">
+                        <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wide bg-brand-orange text-white">${event.eventType}</span>
+                    </td>
+                `;
+                rowContainer.appendChild(tr);
+            });
+        }
+
+        // --- ORGANISATIONAL TIER DRILL-DOWN LOGIC ---
+        function drillToCountries() {
+            orgDrillState.level = 'countries';
+            renderOrganisationalWorkspace();
+        }
+        function showAllRetailersView() {
+            orgDrillState.level = 'all-retailers';
+            renderOrganisationalWorkspace();
+        }
+        function showAllOutletsView() {
+            orgDrillState.level = 'all-outlets';
+            renderOrganisationalWorkspace();
+        }
+        function drillToCountry(coId) {
+            orgDrillState.level = 'country-detail';
+            orgDrillState.selectedCountryId = coId;
+            renderOrganisationalWorkspace();
+        }
+        function drillToRetailer(coId, retId) {
+            orgDrillState.level = 'retailer-detail';
+            orgDrillState.selectedCountryId = coId;
+            orgDrillState.selectedRetailerId = retId;
+            renderOrganisationalWorkspace();
+        }
+        function drillToSelectedCountry() {
+            if (orgDrillState.selectedCountryId) drillToCountry(orgDrillState.selectedCountryId);
+        }
+
+        function renderOrganisationalWorkspace() {
+            const bCountry = document.getElementById('breadcrumb-country');
+            const bSep1 = document.getElementById('breadcrumb-sep-1');
+            const bRetailer = document.getElementById('breadcrumb-retailer');
+            const bSep2 = document.getElementById('breadcrumb-sep-2');
+
+            const stageTitle = document.getElementById('org-stage-title');
+            const outputContainer = document.getElementById('org-stage-output-container');
+            const actionPanel = document.getElementById('org-action-panel');
+
+            bCountry.classList.add('hidden'); bSep1.classList.add('hidden');
+            bRetailer.classList.add('hidden'); bSep2.classList.add('hidden');
+            outputContainer.innerHTML = ""; actionPanel.innerHTML = "";
+
+            if (orgDrillState.level === 'countries') {
+                stageTitle.textContent = "Global Country Registry";
+                let html = `<table class="w-full text-left border-collapse text-xs font-semibold">
+                    <thead><tr class="border-b-2 border-black text-gray-500 uppercase"><th class="py-2">Country Hub</th><th class="py-2">Region</th><th class="py-2 text-right">Action</th></tr></thead><tbody>`;
+                state.countryOffices.forEach(co => {
+                    html += `<tr class="border-b border-gray-100 hover:bg-brand-beige/50">
+                        <td class="py-3 font-extrabold uppercase text-black">${co.name}</td>
+                        <td class="py-3 text-gray-500 uppercase">${co.region}</td>
+                        <td class="py-3 text-right"><button onclick="drillToCountry('${co.id}')" class="bg-black hover:bg-brand-orange text-white text-xxs font-black px-3 py-1.5 rounded-lg uppercase transition">Manage Hub</button></td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+                outputContainer.innerHTML = html;
+
+                actionPanel.innerHTML = `<div class="bg-white p-6 rounded-2xl border-4 border-black space-y-3">
+                    <h4 class="font-extrabold text-xs uppercase tracking-wider">Onboard Country Office</h4>
+                    <input type="text" id="org-country-name" placeholder="Uganda" class="w-full bg-brand-beige border-2 border-black rounded-xl p-2 text-xs font-bold">
+                    <input type="text" id="org-country-region" placeholder="East Africa" class="w-full bg-brand-beige border-2 border-black rounded-xl p-2 text-xs font-bold">
+                    <button onclick="saveCountryOffice()" class="w-full bg-black text-white hover:bg-brand-orange py-2 rounded-xl text-xs font-black uppercase">Register Hub</button>
+                </div>`;
+            } else if (orgDrillState.level === 'country-detail') {
+                const co = state.countryOffices.find(c => c.id === orgDrillState.selectedCountryId);
+                bSep1.classList.remove('hidden'); bCountry.classList.remove('hidden'); bCountry.textContent = co.name;
+                stageTitle.textContent = `${co.name} Corporate Retailers`;
+
+                let html = `<table class="w-full text-left border-collapse text-xs font-semibold">
+                    <thead><tr class="border-b-2 border-black text-gray-500 uppercase"><th class="py-2">Retailer Chain</th><th class="py-2">Preset Catalogue</th><th class="py-2 text-right">Action</th></tr></thead><tbody>`;
+                state.retailers.filter(r => r.countryOfficeId === co.id).forEach(ret => {
+                    html += `<tr class="border-b border-gray-100">
+                        <td class="py-3 font-extrabold uppercase text-brand-green">${ret.name}</td>
+                        <td class="py-3 font-mono font-bold text-xxs">${ret.presetId}</td>
+                        <td class="py-3 text-right"><button onclick="drillToRetailer('${co.id}', '${ret.id}')" class="bg-black hover:bg-brand-orange text-white text-xxs font-black px-3 py-1.5 rounded-lg uppercase">Manage Chains</button></td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+                outputContainer.innerHTML = html;
+
+                actionPanel.innerHTML = `<div class="bg-white p-6 rounded-2xl border-4 border-black space-y-3">
+                    <h4 class="font-extrabold text-xs uppercase tracking-wider">Add Retailer to ${co.name}</h4>
+                    <input type="text" id="org-retailer-name" placeholder="Halons Pharmacy Chain" class="w-full bg-brand-beige border-2 border-black rounded-xl p-2 text-xs font-bold">
+                    <button onclick="saveRetailerScoped('${co.id}')" class="w-full bg-brand-orange text-white py-2 rounded-xl text-xs font-black uppercase">Onboard Retailer</button>
+                </div>`;
+            } else if (orgDrillState.level === 'retailer-detail') {
+                const co = state.countryOffices.find(c => c.id === orgDrillState.selectedCountryId);
+                const ret = state.retailers.find(r => r.id === orgDrillState.selectedRetailerId);
+                bSep1.classList.remove('hidden'); bCountry.classList.remove('hidden'); bCountry.textContent = co.name;
+                bSep2.classList.remove('hidden'); bRetailer.classList.remove('hidden'); bRetailer.textContent = ret.name;
+                stageTitle.textContent = `${ret.name} Field Outlets (Retail Points)`;
+
+                let html = `<table class="w-full text-left border-collapse text-xs font-semibold">
+                    <thead><tr class="border-b-2 border-black text-gray-500 uppercase"><th class="py-2">Outlet Location</th><th class="py-2">Type</th><th class="py-2 text-right">Action</th></tr></thead><tbody>`;
+                state.retailPoints.filter(p => p.retailerId === ret.id).forEach(pt => {
+                    html += `<tr class="border-b border-gray-100">
+                        <td class="py-3 font-bold uppercase">${pt.name}</td>
+                        <td class="py-3 text-gray-500 text-xxs font-black uppercase">${pt.type}</td>
+                        <td class="py-3 text-right"><button onclick="deactivateRetailPoint('${pt.id}')" class="text-gray-400 hover:text-brand-orange p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+                outputContainer.innerHTML = html;
+
+                actionPanel.innerHTML = `<div class="bg-white p-6 rounded-2xl border-4 border-black space-y-3">
+                    <h4 class="font-extrabold text-xs uppercase tracking-wider">Add Outlet to ${ret.name}</h4>
+                    <input type="text" id="modal-point-name" placeholder="Coastal Clinic" class="w-full bg-brand-beige border-2 border-black rounded-xl p-2 text-xs font-bold">
+                    <select id="modal-point-type" class="w-full bg-brand-beige border-2 border-black rounded-xl p-2 text-xs font-bold">
+                        <option value="Physical">Physical Storefront</option>
+                        <option value="MobileAgent">Mobile Micro-Agent</option>
+                    </select>
+                    <button onclick="saveRetailPointScoped('${ret.id}')" class="w-full bg-black text-white hover:bg-brand-orange py-2 rounded-xl text-xs font-black uppercase">Register Outlet</button>
+                </div>`;
+            } else {
+                outputContainer.innerHTML = `<div class="py-4 text-center font-bold text-gray-400">Drill down levels available inside sidebar Organisations menu link.</div>`;
+            }
+            lucide.createIcons();
+        }
+
+        // Relational Assignments Inline Triggers
+        function saveCountryOffice() {
+            const countryName = document.getElementById('org-country-name').value.trim();
+            const region = document.getElementById('org-country-region').value.trim();
+            if (!countryName) return;
+            state.countryOffices.push({ id: `co-${state.countryOffices.length + 1}`, name: countryName, region: region });
+            saveState();
+            showToast("Country Hub Onboarded", `Registered central office for ${countryName}.`, "check");
+            renderOrganisationalWorkspace();
+        }
+        function saveRetailerScoped(coId) {
+            const name = document.getElementById('org-retailer-name').value.trim();
+            if (!name) return;
+            state.retailers.push({ id: `ret-${state.retailers.length + 1}`, name: name, countryOfficeId: coId, presetId: "preset-9" });
+            saveState();
+            showToast("Retailer Registered", `Corporate chain ${name} registered.`, "check");
+            renderOrganisationalWorkspace();
+        }
+        function saveRetailPointScoped(retId) {
+            const name = document.getElementById('modal-point-name').value.trim();
+            const type = document.getElementById('modal-point-type').value;
+            if (!name) return;
+            state.retailPoints.push({ id: `rp-${state.retailPoints.length + 1}`, name: name, retailerId: retId, type: type });
+            saveState();
+            showToast("Outlet Registered", `Onboarded endpoint ${name}.`, "check");
+            renderOrganisationalWorkspace();
+        }
+        function deactivateRetailPoint(id) {
+            state.retailPoints = state.retailPoints.filter(p => p.id !== id);
+            saveState();
+            showToast("Outlet Deactivated", "Removed successfully.", "check");
+            renderOrganisationalWorkspace();
+        }
+
+        // --- DIRECTORY LOGIC ---
+        function renderUserDirectory() {
+            const container = document.getElementById('user-directory-rows');
+            container.innerHTML = "";
+            state.users.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-gray-100 hover:bg-gray-50";
+                tr.innerHTML = `
+                    <td class="py-3.5"><div class="font-extrabold text-xs uppercase">${user.name}</div><span class="text-[9px] font-bold text-gray-400">${user.email}</span></td>
+                    <td class="py-3.5"><span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase bg-brand-orange text-white">${user.role}</span></td>
+                    <td class="py-3.5 font-bold text-gray-500 uppercase text-xxs">${user.scopeType || 'Global'}</td>
+                    <td class="py-3.5"><span class="bg-green-100 text-green-800 text-[9px] font-black px-2 py-0.5 rounded-full">ACTIVE</span></td>
+                    <td class="py-3.5 text-right"><button onclick="toggleUserActivation('${user.id}')" class="text-xxs font-black uppercase border px-3 py-1 rounded-lg">SUSPEND</button></td>
+                `;
+                container.appendChild(tr);
+            });
+        }
+
+        function renderCataloguesManager() {
+            const select = document.getElementById('map-preset-retailer-cat');
+            select.innerHTML = "";
+            state.retailers.forEach(r => {
+                select.innerHTML += `<option value="${r.id}">${r.name}</option>`;
+            });
+        }
+
+        function savePresetMappingCat() {
+            const id = document.getElementById('map-preset-retailer-cat').value;
+            const preset = document.getElementById('map-preset-package-cat').value;
+            const ret = state.retailers.find(r => r.id === id);
+            if (ret) {
+                ret.presetId = preset;
+                saveState();
+                showToast("Presets Synced", `Standard catalogue preset changed to ${preset} for ${ret.name}.`, "check");
+            }
+        }
+
+        function renderCustomOrders() {
+            const container = document.getElementById('custom-orders-rows');
+            const placeholder = document.getElementById('no-custom-indicator');
+            container.innerHTML = "";
+            const custom = state.consultations.filter(e => e.eventType === 'CustomOrder');
+            placeholder.classList.toggle('hidden', custom.length > 0);
+
+            custom.forEach(order => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-gray-100";
+                const rp = state.retailPoints.find(p => p.id === order.retailPointId);
+                let textBtn = order.isFulfilled ? "Completed" : "Mark Machined";
+
+                tr.innerHTML = `
+                    <td class="py-3"><div class="font-extrabold text-xs uppercase">${order.customerName}</div><span class="text-[9px] font-bold text-gray-400">${order.phone}</span></td>
+                    <td class="py-3 font-bold text-gray-600 uppercase text-xs">${rp ? rp.name : 'Unknown Location'}</td>
+                    <td class="py-3 font-mono font-bold text-xxs">Left Sph: ${order.leftEyeDiopter?.sph || '0'} / Right Sph: ${order.rightEyeDiopter?.sph || '0'}</td>
+                    <td class="py-3"><span class="px-2 py-0.5 rounded text-xxs font-black uppercase bg-brand-yellow/30">${order.isFulfilled ? 'Delivered' : 'Awaiting Lab'}</span></td>
+                    <td class="py-3 text-right"><button onclick="advanceOrderStatus('${order.id}')" class="bg-black text-white hover:bg-brand-orange text-[9px] font-black px-3 py-1 rounded-lg uppercase transition">${textBtn}</button></td>
+                `;
+                container.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        function advanceOrderStatus(id) {
+            const order = state.consultations.find(e => e.id === id);
+            if (order) {
+                order.isFulfilled = true;
+                saveState();
+                showToast("Order Processed", "Custom prescription marked as fulfilled and delivered.", "check");
+                renderCustomOrders();
+            }
+        }
+
+        // Helper triggers
+        function openLogConsultationModal() {
+            document.getElementById('log-consultation-modal').classList.remove('hidden');
+            const select = document.getElementById('field-retail-point');
+            select.innerHTML = "";
+            state.retailPoints.forEach(p => {
+                select.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+            });
+            updateModalCatalogDropdowns();
+        }
+        function closeLogConsultationModal() {
+            document.getElementById('log-consultation-modal').classList.add('hidden');
+        }
+        function updateModalCatalogDropdowns() {
+            const pt = state.retailPoints.find(p => p.id === document.getElementById('field-retail-point').value);
+            const ret = state.retailers.find(r => r.id === pt?.retailerId);
+            const pr = presets[ret?.presetId || 'preset-9'];
+            const selectLeft = document.getElementById('field-left-sphere');
+            const selectRight = document.getElementById('field-right-sphere');
+            selectLeft.innerHTML = ""; selectRight.innerHTML = "";
+            pr.forEach(pow => {
+                selectLeft.innerHTML += `<option value="${pow}">${pow}</option>`;
+                selectRight.innerHTML += `<option value="${pow}">${pow}</option>`;
+            });
+        }
+        function matchPrescriptionLeftToRight() {
+            document.getElementById('field-right-sphere').value = document.getElementById('field-left-sphere').value;
+            document.getElementById('field-right-cylinder').value = document.getElementById('field-left-cylinder').value;
+        }
+        function setEventType(type) {
+            selectedEventType = type;
+            document.getElementById('crm-block').classList.toggle('hidden', type === 'TestOnly');
+            document.getElementById('dropout-block').classList.toggle('hidden', type !== 'Lead');
+            document.getElementById('product-block').classList.toggle('hidden', type === 'TestOnly');
+            document.getElementById('custom-prescription-notice').classList.toggle('hidden', type !== 'CustomOrder');
+        }
+
+        function submitFieldEvent() {
+            const name = document.getElementById('field-name').value.trim();
+            const phone = document.getElementById('field-phone').value.trim();
+            if (selectedEventType !== 'TestOnly' && (!name || !phone)) {
+                showToast("Required Fields", "Name and phone are compulsory.", "alert");
+                return;
+            }
+
+            state.consultations.unshift({
+                id: 'evt-' + Math.random().toString(36).substr(2, 9),
+                eventDate: new Date().toISOString().split('T')[0],
+                retailPointId: document.getElementById('field-retail-point').value,
+                age: parseInt(document.getElementById('field-age').value),
+                gender: document.getElementById('field-gender').value,
+                leftEyeDiopter: { sph: document.getElementById('field-left-sphere').value, cyl: document.getElementById('field-left-cylinder').value },
+                rightEyeDiopter: { sph: document.getElementById('field-right-sphere').value, cyl: document.getElementById('field-right-cylinder').value },
+                eventType: selectedEventType,
+                customerName: name || null,
+                phone: phone || null,
+                isFulfilled: false
+            });
+
+            saveState();
+            closeLogConsultationModal();
+            updateDashboardMetrics();
+            renderActiveViewData();
+            showToast("Log Added", "Consultation event logged successfully.", "check");
+        }
+
+        function updateDashboardMetrics() {
+            const filtered = state.consultations;
+            const tests = filtered.filter(e => e.eventType === 'TestOnly').length;
+            const leads = filtered.filter(e => e.eventType === 'Lead').length;
+            const sales = filtered.filter(e => e.eventType === 'Sale').length;
+            const customs = filtered.filter(e => e.eventType === 'CustomOrder').length;
+
+            document.getElementById('stat-tests').textContent = tests;
+            document.getElementById('stat-leads').textContent = leads;
+            document.getElementById('stat-sales').textContent = sales;
+            document.getElementById('stat-custom').textContent = customs;
+
+            const total = tests + leads + sales + customs;
+            document.getElementById('stat-conversion').textContent = total > 0 ? `${Math.round((sales / total) * 100)}%` : '0%';
+        }
+
+        function applyFilters() { renderActiveViewData(); }
+
+        function showToast(title, desc, icon) {
+            const toast = document.getElementById('custom-alert-toast');
+            document.getElementById('alert-toast-desc').textContent = desc;
+            toast.className = "fixed bottom-4 right-4 z-50 transform translate-y-0 opacity-100 transition bg-black text-white border-2 border-brand-orange px-5 py-3 rounded-xl flex items-center space-x-3";
+            setTimeout(() => {
+                toast.className = "fixed bottom-4 right-4 z-50 transform translate-y-20 opacity-0 transition text-white flex items-center";
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
